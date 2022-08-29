@@ -12,7 +12,6 @@ class User(SqlAlchemyBase):
     rgt_id = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey("regiments.id"), default=-1)
     age = sqlalchemy.Column(sqlalchemy.Integer, default=-1)
     prr = sqlalchemy.Column(sqlalchemy.Integer, default=-1)
-    time_zone = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
     def __repr__(self):
         return f"<User> {self.id} {self.nickname}"

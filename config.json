@@ -1,30 +1,128 @@
 {
-  "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.GNMF8P.YSj4isiw1KY7zmJbXmfRu5URIXFJ3gz3KOG49U",
-  "regiments": [
-    "WarCA",
-    "WarCI",
-    "MODER",
-    "KOKA",
-    "030H",
-    "DSRTR",
-    "IIUBO",
-    "03OH",
-    "METAH",
-    "A3OT",
-    "PolBu",
-    "PTyTb",
-    "OKTAH",
-    "HEOH",
-    "Hired",
-    "XPOM",
-    "XJIOP",
-    "ZomCa",
-    "KAPAT",
-    "Manic",
-    "OTPOK",
-    "NAMI",
-    "RUBY",
-    "Valve",
-    "AGFT"
-  ]
+  "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.G6ojkA.VSlMoT-eRv0q2spMZHBIC5pfdxctYgbcw7kUaY",
+  "command_prefix": "!",
+  "registration": {
+    "regiments": [
+      {
+        "name": "WarCI",
+        "roleId": 1,
+        "channelId": 1
+      },
+      {
+        "name": "MODER",
+        "roleId": 2,
+        "channelId": 2
+      },
+      {
+        "name": "KOKA",
+        "roleId": 3,
+        "channelId": 3
+      },
+      {
+        "name": "030H",
+        "roleId": 4,
+        "channelId": 4
+      },
+      {
+        "name": "DSRTR",
+        "roleId": 5,
+        "channelId": 5
+      },
+      {
+        "name": "IIUBO",
+        "roleId": 6,
+        "channelId": 6
+      },
+      {
+        "name": "03OH",
+        "roleId": 7,
+        "channelId": 7
+      },
+      {
+        "name": "METAH",
+        "roleId": 8,
+        "channelId": 8
+      },
+      {
+        "name": "A3OT",
+        "roleId": 9,
+        "channelId": 9
+      },
+      {
+        "name": "PolBu",
+        "roleId": 10,
+        "channelId": 10
+      },
+      {
+        "name": "PTyTb",
+        "roleId": 11,
+        "channelId": 11
+      },
+      {
+        "name": "OKTAH",
+        "roleId": 12,
+        "channelId": 12
+      },
+      {
+        "name": "HEOH",
+        "roleId": 13,
+        "channelId": 13
+      },
+      {
+        "name": "Hired",
+        "roleId": 14,
+        "channelId": 14
+      },
+      {
+        "name": "XPOM",
+        "roleId": 15,
+        "channelId": 15
+      },
+      {
+        "name": "XJIOP",
+        "roleId": 16,
+        "channelId": 16
+      },
+      {
+        "name": "ZomCa",
+        "roleId": 17,
+        "channelId": 17
+      },
+      {
+        "name": "KAPAT",
+        "roleId": 18,
+        "channelId": 18
+      },
+      {
+        "name": "Manic",
+        "roleId": 19,
+        "channelId": 19
+      },
+      {
+        "name": "OTPOK",
+        "roleId": 20,
+        "channelId": 20
+      },
+      {
+        "name": "NAMI",
+        "roleId": 21,
+        "channelId": 21
+      },
+      {
+        "name": "RUBY",
+        "roleId": 22,
+        "channelId": 22
+      },
+      {
+        "name": "Valve",
+        "roleId": 23,
+        "channelId": 23
+      },
+      {
+        "name": "AGFT",
+        "roleId": 24,
+        "channelId": 24
+      }
+    ]
+  }
 }

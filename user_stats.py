@@ -1,82 +1,16 @@
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 import time
 import asyncio
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import requests
-
-
-# если будет rasberry PI, то сделать pyvirtual Display
-class AsyncWebDriverWait(WebDriverWait):
-    async def async_until(self, method, message: str = ""):
-        screen = None
-        stacktrace = None
-        end_time = time.monotonic() + self._timeout
-        while True:
-            try:
-                value = method(self._driver)
-                if value:
-                    return value
-            except self._ignored_exceptions as exc:
-                screen = getattr(exc, 'screen', None)
-                stacktrace = getattr(exc, 'stacktrace', None)
-            await asyncio.sleep(self._poll)
-            if time.monotonic() > end_time:
-                break
-        raise TimeoutException(message, screen, stacktrace)
+from data import db_session
+from data.users import User
 
 
 class StatScraper:
     def __init__(self):
-        options = Options()
-        options.add_argument('--disable-infobars')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-browser-side-navigation')
-        options.add_argument("--remote-debugging-port=9222")
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--ignore-ssl-errors')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--log-level=3")
-        driver = uc.Chrome(options=options)
-        self.driver = driver
-        self.queue = list()
         self.stuff_lock = asyncio.Lock()
 
-    def parse_element(self, element):
-        table = BeautifulSoup(element.get_attribute('innerHTML'), "html.parser")
-        stats = list()
-        for col in table.select("ul"):
-            stats.append(list())
-            for row in col.select("li"):
-                stats[-1].append(row.text)
-        new_stats = list()
-        for i in range(len(stats[0])):
-            new_stats.append(list())
-            for j in range(len(stats)):
-                new_stats[-1].append(stats[j][i])
-        return new_stats
-
-    async def get_user_stats_official(self, username, delay=10):
-        # username = "UN1Y_SATAN1ST"
-        # https://warthunder.ru/ru/community/claninfo/War%20Clown%20Association для ЛПР
-        async with self.stuff_lock:
-            url = f'https://warthunder.ru/ru/community/userinfo/?nick={username}'
-            self.driver.get(url)
-            self.driver.maximize_window()
-            try:
-                element = await AsyncWebDriverWait(self.driver, delay).async_until(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, ".user-stat__list-row--with-head")))
-            except TimeoutException:
-                return False
-            return self.parse_element(element)
-
     async def get_user_stats_thunderskill(self, username, delay=10):
-        # если есть ник - делаю запрос на thunderskill
         async with self.stuff_lock:
             base_url = "https://thunderskill.com/ru/stat/"
             url = "https://thunderskill.com/ru/stat/" + username + "/export/json"
@@ -88,3 +22,11 @@ class StatScraper:
                 return False
             stats = req.json()
             return stats
+
+    async def stats_display(self, username):
+        stats = (await self.get_user_stats_thunderskill(username))
+        stats = stats["stats"]["r"]
+
+        return (f"`Игрок: {username}`\n"
+                f"`КПД(РБ): {stats['kpd']}`\n"
+                f"`КД(РБ): {stats['kd']}`")

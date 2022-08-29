@@ -30,37 +30,38 @@ class Commands(commands.Cog):
         print(help(ctx))
         await ctx.send(ctx.author.roles)
 
-    @commands.command(name='addrole')
-    async def my_randint(self, ctx):
-        role_guest = filter(lambda role: role.name == "Гость", ctx.author.guild.roles).__next__()
-        await ctx.author.add_roles(role_guest)
+    @commands.command(name='gore')
+    async def gore(self, ctx, nickname: str):
+        output_ch = filter(lambda chl: chl.id == 978238061446053975,
+                           ctx.guild.channels).__next__()
+        await output_ch.send(await self.bot.scraper.stats_display(nickname))
 
     @commands.command(name='rmrole')
     async def my_randint(self, ctx):
         role_guest = filter(lambda role: role.name == "Гость", ctx.author.guild.roles).__next__()
         await ctx.author.remove_roles(role_guest)
 
-    @commands.command(name='ct')
-    async def create_thread(self, ctx):
-        channel = filter(lambda ch: ch.name == "test", ctx.guild.text_channels).__next__()
-        thread = await channel.create_thread(name=f"Регистрация {ctx.author.name}",
-                                             type=discord.ChannelType.public_thread)
-        await thread.send(f"{ctx.author.mention}, регистрация будет проходить в этой ветке.")
+    @commands.command(name='stats')
+    async def get_stats(self, ctx, user_id: int):
+        await ctx.send("Ожидайте...")
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(user_id)
+        if not user:
+            await ctx.send("Пользователь с таким id не зарегистрирован.")
+            return
+        self.bot.stats_display(user.nickname)
+        await ctx.send(await self.bot.scraper.stats_display(user.nickname))
 
 
-def init_token():
+def init_config():
     file_config = open("config.json", "r")
-    config = json.loads(file_config.read())
-    token = config["bot_token"]
+    _config = json.loads(file_config.read())
     file_config.close()
-    return token
+    return config
 
 
-def check_regiments():
-    file_config = open("config.json", "r")
-    config = json.loads(file_config.read())
-    regiments = config["regiments"]
-    file_config.close()
+def check_regiments(_config):
+    regiments = _config["regiments"]
     db_sess = db_session.create_session()
     all_rgt_db = db_sess.query(Regiment.label).all()
     all_rgt_db = list(zip(*all_rgt_db))
@@ -75,8 +76,8 @@ def check_regiments():
 
 
 if __name__ == "__main__":
-    check_regiments()
-    TOKEN = init_token()
+    config = init_config()
+    check_regiments(config)
 
     intents = discord.Intents.default()
     intents.members = True
@@ -84,8 +85,9 @@ if __name__ == "__main__":
     intents.message_content = True
     intents.messages = True
 
-    bot = commands.Bot(command_prefix='!', intents=intents)
+    bot = commands.Bot(command_prefix=config["command_prefix"], intents=intents)
+    bot.config = config
     bot.add_cog(Commands(bot))
     bot.add_cog(RegistrationForm(bot))
     bot.scraper = StatScraper()
-    bot.run(TOKEN)
+    bot.run(bot.config["bot_token"])

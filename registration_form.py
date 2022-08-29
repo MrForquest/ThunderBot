@@ -17,7 +17,7 @@ class RegistrationForm(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel = filter(lambda ch: ch.name == "test", member.guild.text_channels).__next__()
+        channel = filter(lambda ch: ch.name == "📑〡анкеты", member.guild.text_channels).__next__()
         db_sess = db_session.create_session()
         user_db = db_sess.query(User.id).filter(member.id == User.id).first()
         if user_db:
@@ -50,8 +50,7 @@ class RegistrationForm(commands.Cog):
             await self.registration(message.author)
 
     @commands.command(name='reg')
-    async def lol(self, ctx):
-        # await self.registration(ctx.message.author)
+    async def start_registration(self, ctx):
         await self.on_member_join(ctx.message.author)
 
     async def stop_registration(self, user):
@@ -87,9 +86,12 @@ class RegistrationForm(commands.Cog):
             await msg.channel.send(reaction)
             await msg.clear_reactions()
             if reaction.emoji == "❌":
-                await msg.channel.send("Регистрация отменена.")
+                await msg.channel.send("Регистрация отменена.\n"
+                                       "Так как вы отказались принимать правила нашего сообщества,\n"
+                                       "то вы будете кикнуты с сервера.")
                 await asyncio.sleep(3)
                 await self.stop_registration(user)
+                user.kick(reason="Надо было согласиться с правилами.")
                 return
 
             self.registr_table[user.id]["stage"] += 1
@@ -147,45 +149,12 @@ class RegistrationForm(commands.Cog):
 
         elif self.registr_table[user.id]["stage"] == 3:
             await self.registr_table[user.id]["thread"].send(
-                "4. Напишите ваш часовой пояс в формате: `UTC+?` или `UTC-?`\n   "
-                "где `?` - это сдвиг по времени относительно Гринвича.\n   "
-                "(Для Москвы `UTC+3`)"
-            )
-
-            def check2(msg_f):
-                if msg_f.author.id == user.id:
-                    if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 3
-                return False
-
-            params = {"event": "message", "timeout": 1 * 5 * 60, "check": check2}
-            time_zone = await self.try_timeout(user, self.bot.wait_for, params)
-            try:
-                time_zone = int(time_zone.content.lower().replace("utc", ""))
-                self.registr_table[user.id]["time_zone"] = time_zone
-                self.registr_table[user.id]["stage"] += 1
-                await self.registration(user)
-                return
-            except ValueError:
-                self.registr_table[user.id]["num_att0"] = self.registr_table[user.id].get("num_att0",
-                                                                                          0) + 1
-                if self.registr_table[user.id]["num_att0"] == 3:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Вы использовали 3 попытки. Просим вас пройти регистрацию через офицера.")
-                else:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Неправильный формат ввода.\nПопробуйте ещё раз.")
-                    await self.registration(user)
-                    return
-
-        elif self.registr_table[user.id]["stage"] == 4:
-            await self.registr_table[user.id]["thread"].send(
-                "5. Напишите ваш ник в игре War Thunder:")
+                "4. Напишите ваш ник в игре War Thunder:")
 
             def check3(msg_f):
                 if msg_f.author.id == user.id:
                     if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 4
+                        return self.registr_table[msg_f.author.id]["stage"] == 3
                 return False
 
             params = {"event": "message", "timeout": 24 * 60 * 60, "check": check3}
@@ -210,12 +179,18 @@ class RegistrationForm(commands.Cog):
                 self.registr_table[user.id]["nickname"] = wt_name
                 await self.registr_table[user.id]["thread"].send("Отлично!")
                 await self.registr_table[user.id]["thread"].send("⠀")
+
+                output_ch = filter(lambda chl: chl.id == 978238061446053975,
+                                   user.guild.channels).__next__()
+                stats = stats["stats"]["r"]
+                await output_ch.send((f"`Игрок: {self.registr_table[user.id]['nickname']}`\n"
+                                      f"`КПД(РБ): {stats['kpd']}`\n"
+                                      f"`КД(РБ): {stats['kd']}`"))
                 db_sess = db_session.create_session()
                 user_db = User(id=user.id,
                                real_name=self.registr_table[user.id]["real_name"],
                                nickname=self.registr_table[user.id]["nickname"],
-                               age=self.registr_table[user.id]["age"],
-                               time_zone=self.registr_table[user.id]["time_zone"]
+                               age=self.registr_table[user.id]["age"]
                                )
                 try:
                     db_sess.add(user_db)
@@ -227,8 +202,8 @@ class RegistrationForm(commands.Cog):
                     await self.stop_registration(user)
                     return
                 try:
-                    await user.edit(nick=f"<{self.registr_table[user.id]['nickname']}> "
-                                         f"{self.registr_table[user.id]['real_name']}")
+                    await user.edit(nick=f"<{self.registr_table[user.id]['nickname']}>"
+                                         f"({self.registr_table[user.id]['real_name']})")
                 except discord.errors.Forbidden:
                     await self.registr_table[user.id]["thread"].send(
                         "По всей видимости вы очень высокопоставленный человек на этом сервере.\n"
@@ -237,10 +212,10 @@ class RegistrationForm(commands.Cog):
                 self.registr_table[user.id]["stage"] += 1
                 await self.registration(user)
                 return
-        elif self.registr_table[user.id]["stage"] == 5:
+        elif self.registr_table[user.id]["stage"] == 4:
             msg = await self.registr_table[user.id]["thread"].send(
                 "Регистрация почти закончена.\n"
-                "6. Вы желаете вступить в полк?"
+                "5. Вы желаете вступить в полк?"
             )
             await msg.add_reaction("✅")
             await msg.add_reaction("❌")
@@ -264,9 +239,9 @@ class RegistrationForm(commands.Cog):
                 await self.registration(user)
                 return
 
-        elif self.registr_table[user.id]["stage"] == 6:
+        elif self.registr_table[user.id]["stage"] == 5:
             msg = await self.registr_table[user.id]["thread"].send(
-                "7. Если вы готовы регулярно участвоать в полковых боях, то предлагаем вам вступить в\n"
+                "6. Если вы готовы регулярно участвоать в полковых боях, то предлагаем вам вступить в\n"
                 "   полк **WarCA**.\n"
                 "   Вы желаете вступить в полк **WarCA**?"
             )
@@ -309,7 +284,7 @@ class RegistrationForm(commands.Cog):
                 await self.stop_registration(user)
                 return
 
-        elif self.registr_table[user.id]["stage"] == 7:
+        elif self.registr_table[user.id]["stage"] == 6:
             db_sess = db_session.create_session()
             all_rgt_db = db_sess.query(Regiment.label).all()
             all_rgt_db = list(zip(*all_rgt_db))
