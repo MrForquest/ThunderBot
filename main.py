@@ -8,7 +8,6 @@ from user_stats import StatScraper
 import asyncio
 from data import db_session
 from data.users import User
-from data.regiments import Regiment
 import json
 
 logger = logging.getLogger('discord')
@@ -52,33 +51,24 @@ class Commands(commands.Cog):
         self.bot.stats_display(user.nickname)
         await ctx.send(await self.bot.scraper.stats_display(user.nickname))
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.id == member.id).first()
+        if not (user is None):
+            user.delete()
+            db_sess.commit()
+
 
 def init_config():
     file_config = open("config.json", "r")
     _config = json.loads(file_config.read())
     file_config.close()
-    return config
-
-
-def check_regiments(_config):
-    regiments = _config["regiments"]
-    db_sess = db_session.create_session()
-    all_rgt_db = db_sess.query(Regiment.label).all()
-    all_rgt_db = list(zip(*all_rgt_db))
-    if all_rgt_db:
-        all_rgt_db = all_rgt_db[0]
-    # print(all_rgt_db)
-    # print(regiments)
-    for rgt in regiments:
-        if not (rgt in all_rgt_db):
-            db_sess.add(Regiment(label=rgt))
-    db_sess.commit()
+    return _config
 
 
 if __name__ == "__main__":
     config = init_config()
-    check_regiments(config)
-
     intents = discord.Intents.default()
     intents.members = True
     intents.guilds = True

@@ -1,7 +1,29 @@
 {
   "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.G6ojkA.VSlMoT-eRv0q2spMZHBIC5pfdxctYgbcw7kUaY",
   "command_prefix": "!",
+  "channels": {
+    "statsOutput": 764083882038919181
+  },
+  "roles": {
+    "guestRole": {
+      "name": "Гость",
+      "roleId": 1002328082084007987
+    },
+    "officerRole": {
+      "name": "Офицер",
+      "roleId": 1002328420170084462
+    },
+    "studentRole": {
+      "name": "Учебный полк",
+      "roleId": 1010674523319832586
+    },
+    "eliteRole": {
+      "name": "WarCA",
+      "roleId": 1002328382056435744
+    }
+  },
   "registration": {
+    "channelRegistrationId": 850490918490210314,
     "regiments": [
       {
         "name": "WarCI",
@@ -10,12 +32,12 @@
       },
       {
         "name": "MODER",
-        "roleId": 2,
+        "roleId": 1010668947550507048,
         "channelId": 2
       },
       {
         "name": "KOKA",
-        "roleId": 3,
+        "roleId": 1010669034322284604,
         "channelId": 3
       },
       {

@@ -9,7 +9,8 @@ class User(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, unique=True)
     real_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     nickname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    rgt_id = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey("regiments.id"), default=-1)
+    # rgt_id - discord id роли полка
+    rgt_id = sqlalchemy.Column(sqlalchemy.Integer, default=-1)
     age = sqlalchemy.Column(sqlalchemy.Integer, default=-1)
     prr = sqlalchemy.Column(sqlalchemy.Integer, default=-1)
 
