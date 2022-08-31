@@ -44,7 +44,8 @@ class RegistrationForm(commands.Cog):
 
     @commands.command(name='reg')
     async def start_registration(self, ctx):
-        await self.on_member_join(ctx.message.author)
+        if ctx.message.channel.id == self.bot.config["channels"]["flood"]:
+            await self.on_member_join(ctx.message.author)
 
     async def stop_registration(self, user):
         await self.registr_table[user.id]["thread"].delete()
@@ -60,7 +61,7 @@ class RegistrationForm(commands.Cog):
             return
 
     async def registration(self, user):
-        rules = "ПРАВИЛА"
+        rules = "https://discord.com/channels/256745640011366402/969597794157482014/973867963587379200"
         if self.registr_table[user.id]["stage"] == 0:
             msg = await self.registr_table[user.id]["thread"].send(
                 f"1. Ознакомьтесь с правилами сообщества:\n"
@@ -120,9 +121,9 @@ class RegistrationForm(commands.Cog):
                 return False
 
             params = {"event": "message", "timeout": 1 * 5 * 60, "check": check1}
-            age = await self.try_timeout(user, self.bot.wait_for, params)
+            age_msg = await self.try_timeout(user, self.bot.wait_for, params)
             try:
-                age = int(age.content)
+                age = int(age_msg.content)
                 self.registr_table[user.id]["age"] = age
                 self.registr_table[user.id]["stage"] += 1
                 await self.registration(user)
@@ -157,7 +158,9 @@ class RegistrationForm(commands.Cog):
             msg_name = await self.try_timeout(user, self.bot.wait_for, params)
             wt_name = msg_name.content
             await self.registr_table[user.id]["thread"].send("Проверка займёт не больше минуты")
-            stats = await self.bot.scraper.get_user_stats_thunderskill(wt_name)
+            stats = await self.bot.scraper.get_stats(wt_name)
+            if stats.get("error", 200) == 404:
+                stats = False
             if not stats:
                 await self.registr_table[user.id]["thread"].send(
                     "Не удалось получить информацию об игроке с таким ником.\n"
@@ -181,10 +184,15 @@ class RegistrationForm(commands.Cog):
                 output_id = self.bot.config["channels"]["statsOutput"]
                 output_ch = filter(lambda chl: chl.id == output_id,
                                    user.guild.channels).__next__()
-                stats = stats["stats"]["r"]
-                await output_ch.send((f"`Игрок: {self.registr_table[user.id]['nickname']}`\n"
-                                      f"`КПД(РБ): {stats['kpd']}`\n"
-                                      f"`КД(РБ): {stats['kd']}`"))
+                if stats["source"] == "ts":
+                    stats = stats["stats"]["r"]
+                    await output_ch.send((f"`Игрок: {self.registr_table[user.id]['nickname']}`\n"
+                                          f"`КПД(РБ): {stats['kpd']}`\n"
+                                          f"`КД(РБ): {stats['kd']}`"))
+                elif stats["source"] == "wro":
+                    await output_ch.send((f"`Игрок: {self.registr_table[user.id]['nickname']}`\n"
+                                          f"`Винрейт(РБ): {stats['winrate']}`\n"
+                                          f"`КД(РБ): {stats['kd']}`"))
                 db_sess = db_session.create_session()
                 db_sess = db_session.create_session()
                 user_db = User(id=user.id,
@@ -335,7 +343,7 @@ class RegistrationForm(commands.Cog):
                 user_db.rgt_id = role_rgt.id
                 db_sess.commit()
                 await self.registr_table[user.id]["thread"].send(
-                    "**Добро пожаловать к нам сервер!**"
+                    "**Добро пожаловать к нам на сервер!**"
                 )
                 await asyncio.sleep(4)
                 await self.stop_registration(user)

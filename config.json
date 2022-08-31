@@ -2,28 +2,29 @@
   "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.G6ojkA.VSlMoT-eRv0q2spMZHBIC5pfdxctYgbcw7kUaY",
   "command_prefix": "!",
   "channels": {
-    "statsOutput": 764083882038919181
+    "statsOutput": 1011365125292314754,
+    "flood": 1014445145996927006
   },
   "roles": {
     "guestRole": {
       "name": "Гость",
-      "roleId": 1002328082084007987
+      "roleId": 1011325489249538140
     },
     "officerRole": {
       "name": "Офицер",
-      "roleId": 1002328420170084462
+      "roleId": 978238061072744459
     },
     "studentRole": {
       "name": "Учебный полк",
-      "roleId": 1010674523319832586
+      "roleId": 978238061072744458
     },
     "eliteRole": {
       "name": "WarCA",
-      "roleId": 1002328382056435744
+      "roleId": 978238061072744460
     }
   },
   "registration": {
-    "channelRegistrationId": 850490918490210314,
+    "channelRegistrationId": 1011364961060126856,
     "regiments": [
       {
         "name": "WarCI",
@@ -32,17 +33,17 @@
       },
       {
         "name": "MODER",
-        "roleId": 1010668947550507048,
+        "roleId": 978238061060190226,
         "channelId": 2
       },
       {
         "name": "KOKA",
-        "roleId": 1010669034322284604,
+        "roleId": 978238061060190223,
         "channelId": 3
       },
       {
         "name": "030H",
-        "roleId": 4,
+        "roleId": 978238061060190222,
         "channelId": 4
       },
       {
@@ -62,12 +63,12 @@
       },
       {
         "name": "METAH",
-        "roleId": 8,
+        "roleId": 978238061060190226,
         "channelId": 8
       },
       {
         "name": "A3OT",
-        "roleId": 9,
+        "roleId": 978238061043400768,
         "channelId": 9
       },
       {
@@ -112,22 +113,22 @@
       },
       {
         "name": "KAPAT",
-        "roleId": 18,
+        "roleId": 978238061060190220,
         "channelId": 18
       },
       {
         "name": "Manic",
-        "roleId": 19,
+        "roleId": 978238061030834204,
         "channelId": 19
       },
       {
         "name": "OTPOK",
-        "roleId": 20,
+        "roleId": 978238061043400764,
         "channelId": 20
       },
       {
         "name": "NAMI",
-        "roleId": 21,
+        "roleId": 978238061043400773,
         "channelId": 21
       },
       {
@@ -137,7 +138,7 @@
       },
       {
         "name": "Valve",
-        "roleId": 23,
+        "roleId": 978238061060190218,
         "channelId": 23
       },
       {

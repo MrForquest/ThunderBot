@@ -29,17 +29,6 @@ class Commands(commands.Cog):
         print(help(ctx))
         await ctx.send(ctx.author.roles)
 
-    @commands.command(name='gore')
-    async def gore(self, ctx, nickname: str):
-        output_ch = filter(lambda chl: chl.id == 978238061446053975,
-                           ctx.guild.channels).__next__()
-        await output_ch.send(await self.bot.scraper.stats_display(nickname))
-
-    @commands.command(name='rmrole')
-    async def my_randint(self, ctx):
-        role_guest = filter(lambda role: role.name == "Гость", ctx.author.guild.roles).__next__()
-        await ctx.author.remove_roles(role_guest)
-
     @commands.command(name='stats')
     async def get_stats(self, ctx, user_id: int):
         await ctx.send("Ожидайте...")
@@ -48,15 +37,34 @@ class Commands(commands.Cog):
         if not user:
             await ctx.send("Пользователь с таким id не зарегистрирован.")
             return
-        self.bot.stats_display(user.nickname)
         await ctx.send(await self.bot.scraper.stats_display(user.nickname))
+
+    @commands.command(name='deluser')
+    async def get_stats(self, ctx, user_id: int):
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(user_id)
+        if user:
+            db_sess.delete(user)
+            db_sess.commit()
+            user = discord.utils.get(bot.get_all_members(), id=user_id)
+            await ctx.send(f"Пользователь {user.mention} удалён из БД")
+        else:
+            await ctx.send(f"Пользователь c таким id не найден.")
+
+    @commands.command(name='help')
+    async def get_help(self, ctx):
+        text = ("> **Список команд**\n> Используйте ! в качестве префикса для команд\n"
+                "> `!reg`: Вызов собственной регистрации\n"
+                "> `!deluser id_пользователя`: Удаление пользователя из БД\n"
+                "> `!stats id_пользователя`: Вывод статистики пользователя")
+        await ctx.reply(text)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.id == member.id).first()
         if not (user is None):
-            user.delete()
+            db_sess.delete(user)
             db_sess.commit()
 
 
@@ -77,6 +85,7 @@ if __name__ == "__main__":
 
     bot = commands.Bot(command_prefix=config["command_prefix"], intents=intents)
     bot.config = config
+    bot.remove_command('help')
     bot.add_cog(Commands(bot))
     bot.add_cog(RegistrationForm(bot))
     bot.scraper = StatScraper()
