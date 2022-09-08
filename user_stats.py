@@ -10,7 +10,6 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import requests
 
 
-# если будет rasberry PI, то сделать pyvirtual Display
 class AsyncWebDriverWait(WebDriverWait):
     async def async_until(self, method, message: str = ""):
         screen = None
@@ -41,7 +40,10 @@ class StatScraper:
         options.add_argument('--ignore-ssl-errors')
         options.add_argument('--disable-gpu')
         options.add_argument("--log-level=3")
-        driver = uc.Chrome(options=options)
+        options.add_argument('--disable-features=VizDisplayCompositor')
+        options.add_argument('--no-sandbox')
+        driver = uc.Chrome(options=options,
+                           driver_executable_path="/usr/lib/chromium-browser/chromedriver")
         self.driver = driver
         self.queue = list()
         self.stuff_lock_official = asyncio.Lock()
@@ -83,6 +85,9 @@ class StatScraper:
             kills = (air_kills + earth_kills + water_kills)
             kd = str(round(kills / deaths)) if deaths != 0 else "None"
             res = {"kd": kd, "winrate": winrate, "source": "wro"}
+            res["display"] = (f"`Игрок: {username}`\n"
+                              f"`Винрейт(РБ): {res['winrate']}`\n"
+                              f"`КД(РБ): {res['kd']}`")
             return res
 
     async def get_user_stats_thunderskill(self, username, delay=10):
@@ -92,26 +97,22 @@ class StatScraper:
             headers = dict()
             headers[
                 'User-Agent'] = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0"
-            req = requests.get(url, headers=headers)
-            if req.status_code != 200:
-                return {"error": req.status_code}
-            stats = req.json()
-            stats["source"] = "ts"
-            return stats
+            try:
+                req = requests.get(url, headers=headers, timeout=7)
+                if req.status_code != 200:
+                    return {"error": req.status_code}
+                stats = req.json()['stats']['r']
+                stats["source"] = "ts"
+                stats["display"] = (f"`Игрок: {username}`\n"
+                                    f"`КПД(РБ): {stats['kpd']}`\n"
+                                    f"`КД(РБ): {stats['kd']}`")
+                return stats
+            except requests.exceptions.Timeout:
+                return 502
 
     async def get_stats(self, username):
         stats = await self.get_user_stats_thunderskill(username)
-        if stats.get("error", 200) == 503:
+        if stats.get("error", 200) in range(500, 505):
             stats = await self.get_user_stats_official(username)
 
         return stats
-
-    async def stats_display(self, username):
-        stats = (await self.get_user_stats_thunderskill(username))
-        if not stats:
-            return "Нет доступа к Thunder Skill"
-        stats = stats["stats"]["r"]
-
-        return (f"`Игрок: {username}`\n"
-                f"`КПД(РБ): {stats['kpd']}`\n"
-                f"`КД(РБ): {stats['kd']}`")

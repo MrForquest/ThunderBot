@@ -1,149 +1,180 @@
 {
-  "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.G6ojkA.VSlMoT-eRv0q2spMZHBIC5pfdxctYgbcw7kUaY",
-  "command_prefix": "!",
+  "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.GlM-EL.blrP4KlD4HILi40ZnNn3bn6gVfaGId0ugYU3KQ",
+  "command_prefix": "*",
+  "guild": 256745640011366402,
   "channels": {
-    "statsOutput": 1011365125292314754,
-    "flood": 1014445145996927006
+    "statsOutput": 1014967988954349598,
+    "flood": 1014967804031680603,
+    "botStatus": 1015028300797714562
   },
   "roles": {
     "guestRole": {
       "name": "Гость",
-      "roleId": 1011325489249538140
+      "roleId": 777294012889563207
+    },
+    "adminRole": {
+      "name": "Админ",
+      "roleId": 979392387094835300
     },
     "officerRole": {
       "name": "Офицер",
-      "roleId": 978238061072744459
+      "roleId": 932772725225848932
     },
     "studentRole": {
       "name": "Учебный полк",
-      "roleId": 978238061072744458
+      "roleId": 959714754203643904
     },
     "eliteRole": {
       "name": "WarCA",
-      "roleId": 978238061072744460
+      "roleId": 777294321854185512
+    },
+    "reservRole": {
+      "name": "резерв",
+      "roleId": 916507569869172767
+    },
+    "alliance": {
+      "name": "Альянс",
+      "roleId": 986863898265260054
+    },
+    "allianceOfficerRole": {
+      "name": "Офицер Альянса",
+      "roleId": 932772725225848932
+    },
+    "careerOfficer": {
+      "name": "Кадровый офицер",
+      "roleId": 967179263709163610
+    },
+    "technoAdmin": {
+      "name": "Технический администратор",
+      "roleId": 777300462805188619
     }
   },
   "registration": {
-    "channelRegistrationId": 1011364961060126856,
+    "channelRegistrationId": 1014967899380777040,
     "regiments": [
       {
         "name": "WarCI",
-        "roleId": 1,
+        "roleId": 1000514623910461551,
         "channelId": 1
       },
       {
-        "name": "MODER",
-        "roleId": 978238061060190226,
+        "name": "XJIOP",
+        "roleId": 959814088584757338,
         "channelId": 2
       },
       {
         "name": "KOKA",
-        "roleId": 978238061060190223,
+        "roleId": 908770702654603275,
         "channelId": 3
       },
       {
         "name": "030H",
-        "roleId": 978238061060190222,
+        "roleId": 835295093413117963,
         "channelId": 4
       },
       {
         "name": "DSRTR",
-        "roleId": 5,
+        "roleId": 908770817649819678,
         "channelId": 5
       },
       {
         "name": "IIUBO",
-        "roleId": 6,
+        "roleId": 917299607187386379,
         "channelId": 6
       },
       {
-        "name": "03OH",
-        "roleId": 7,
+        "name": "03оH",
+        "roleId": 842397142105456650,
         "channelId": 7
       },
       {
         "name": "METAH",
-        "roleId": 978238061060190226,
+        "roleId": 959725281055232041,
         "channelId": 8
       },
       {
         "name": "A3OT",
-        "roleId": 978238061043400768,
+        "roleId": 959812860563820564,
         "channelId": 9
       },
       {
         "name": "PolBu",
-        "roleId": 10,
+        "roleId": 959714360853409802,
         "channelId": 10
       },
       {
         "name": "PTyTb",
-        "roleId": 11,
+        "roleId": 959813799861420093,
         "channelId": 11
       },
       {
         "name": "OKTAH",
-        "roleId": 12,
+        "roleId": 959814233669914645,
         "channelId": 12
       },
       {
         "name": "HEOH",
-        "roleId": 13,
+        "roleId": 959813901824954379,
         "channelId": 13
       },
       {
         "name": "Hired",
-        "roleId": 14,
+        "roleId": 959813544206020618,
         "channelId": 14
       },
       {
         "name": "XPOM",
-        "roleId": 15,
+        "roleId": 959814000902811678,
         "channelId": 15
       },
       {
         "name": "XJIOP",
-        "roleId": 16,
+        "roleId": 959814088584757338,
         "channelId": 16
       },
       {
         "name": "ZomCa",
-        "roleId": 17,
+        "roleId": 959813657141850124,
         "channelId": 17
       },
       {
         "name": "KAPAT",
-        "roleId": 978238061060190220,
+        "roleId": 959813461964103680,
         "channelId": 18
       },
       {
         "name": "Manic",
-        "roleId": 978238061030834204,
+        "roleId": 959813384386248704,
         "channelId": 19
       },
       {
         "name": "OTPOK",
-        "roleId": 978238061043400764,
+        "roleId": 959813718210904114,
         "channelId": 20
       },
       {
         "name": "NAMI",
-        "roleId": 978238061043400773,
+        "roleId": 959813299065716756,
         "channelId": 21
       },
       {
         "name": "RUBY",
-        "roleId": 22,
+        "roleId": 954079334660988931,
         "channelId": 22
       },
       {
         "name": "Valve",
-        "roleId": 978238061060190218,
+        "roleId": 963431563784224808,
         "channelId": 23
       },
       {
         "name": "AGFT",
-        "roleId": 24,
+        "roleId": 980877683250569297,
+        "channelId": 24
+      },
+      {
+        "name": "r384",
+        "roleId": 938458899458191440,
         "channelId": 24
       }
     ]
