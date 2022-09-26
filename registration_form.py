@@ -45,6 +45,9 @@ class RegistrationForm(commands.Cog):
             member.guild.get_role(self.bot.config["roles"]["careerOfficer"]["roleId"]))
         thread.permissions_for(
             member.guild.get_role(self.bot.config["roles"]["technoAdmin"]["roleId"]))
+        thread.permissions_for(
+            member.guild.get_role(self.bot.config["roles"]["commanderRole"]["roleId"]))
+
         await thread.edit(slowmode_delay=3)
         await thread.send(f"{member.mention}, ваша регистрация будет проходить в этой ветке.")
         self.registr_table[member.id] = dict()
@@ -92,321 +95,364 @@ class RegistrationForm(commands.Cog):
             await self.stop_registration(user)
             return
 
-    async def registration(self, user):
+    async def rule_question(self, user, stage):
+        # if self.registr_table[user.id]["stage"] == 0:
         rules = "https://discord.com/channels/256745640011366402/969597794157482014/973867963587379200"
-        if self.registr_table[user.id]["stage"] == 0:
-            msg = await self.registr_table[user.id]["thread"].send(
-                f"1. Ознакомьтесь с правилами сообщества:\n"
-                f"{rules}\nЕсли Вы согласны с этими правилами нажмите на ✅, иначе на ❌")
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
+        msg = await self.registr_table[user.id]["thread"].send(
+            f"{stage + 1}. Ознакомьтесь с правилами сообщества:\n"
+            f"{rules}\nЕсли Вы согласны с этими правилами нажмите на ✅, иначе на ❌")
+        await msg.add_reaction("✅")
+        await msg.add_reaction("❌")
 
-            def check0(reaction_f, user_react):
-                if user_react.id == user.id:
-                    if reaction_f.message.channel.id == self.registr_table[user_react.id][
-                        "thread"].id:
-                        return str(reaction_f.emoji) in ['✅', '❌']
+        def check0(reaction_f, user_react):
+            if user_react.id == user.id:
+                if reaction_f.message.channel.id == self.registr_table[user_react.id][
+                    "thread"].id:
+                    return str(reaction_f.emoji) in ['✅', '❌']
 
-            params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check0}
-            reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
-            await msg.channel.send(reaction)
-            await msg.clear_reactions()
-            if reaction.emoji == "❌":
-                await msg.channel.send("Регистрация отменена.\n"
-                                       "Так как вы отказались принимать правила нашего сообщества,\n"
-                                       "то вы будете кикнуты с сервера.")
-                await asyncio.sleep(3)
-                await self.stop_registration(user)
-                await user.kick(reason="Надо было согласиться с правилами.")
-                return
+        params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check0}
+        reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
+        await msg.channel.send(reaction)
+        await msg.clear_reactions()
+        if reaction.emoji == "❌":
+            await msg.channel.send("Регистрация отменена.\n"
+                                   "Так как вы отказались принимать правила нашего сообщества,\n"
+                                   "то вы будете кикнуты с сервера.")
+            await asyncio.sleep(3)
+            await self.stop_registration(user)
+            await user.kick(reason="Надо было согласиться с правилами.")
+            return
 
+        self.registr_table[user.id]["stage"] += 1
+        await self.registration(user)
+        return
+
+    async def name_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 1:
+        await self.registr_table[user.id]["thread"].send(
+            f"{stage + 1}. Напишите ваше настоящие имя:")
+
+        def check1(msg_f):
+            if msg_f.author.id == user.id:
+                if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
+                    return self.registr_table[msg_f.author.id]["stage"] == stage
+            return False
+
+        params = {"event": "message", "timeout": 1 * 5 * 60, "check": check1}
+        real_name = await self.try_timeout(user, self.bot.wait_for, params)
+        real_name = real_name.content
+        self.registr_table[user.id]["real_name"] = real_name
+        self.registr_table[user.id]["stage"] += 1
+        await self.registration(user)
+        return
+
+    async def age_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 2:
+        await self.registr_table[user.id]["thread"].send(
+            f"{stage + 1}. Напишите ваш возраст:")
+
+        def check1(msg_f):
+            if msg_f.author.id == user.id:
+                if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
+                    return self.registr_table[msg_f.author.id]["stage"] == stage
+            return False
+
+        params = {"event": "message", "timeout": 1 * 5 * 60, "check": check1}
+        age_msg = await self.try_timeout(user, self.bot.wait_for, params)
+        try:
+            age = int(age_msg.content)
+            self.registr_table[user.id]["age"] = age
             self.registr_table[user.id]["stage"] += 1
             await self.registration(user)
             return
-
-        elif self.registr_table[user.id]["stage"] == 1:
-            await self.registr_table[user.id]["thread"].send(
-                "2. Напишите ваше настоящие имя:")
-
-            def check1(msg_f):
-                if msg_f.author.id == user.id:
-                    if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 1
-                return False
-
-            params = {"event": "message", "timeout": 1 * 5 * 60, "check": check1}
-            real_name = await self.try_timeout(user, self.bot.wait_for, params)
-            real_name = real_name.content
-            self.registr_table[user.id]["real_name"] = real_name
-            self.registr_table[user.id]["stage"] += 1
-            await self.registration(user)
-            return
-
-        elif self.registr_table[user.id]["stage"] == 2:
-            await self.registr_table[user.id]["thread"].send(
-                "3. Напишите ваш возраст:")
-
-            def check1(msg_f):
-                if msg_f.author.id == user.id:
-                    if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 2
-                return False
-
-            params = {"event": "message", "timeout": 1 * 5 * 60, "check": check1}
-            age_msg = await self.try_timeout(user, self.bot.wait_for, params)
-            try:
-                age = int(age_msg.content)
-                self.registr_table[user.id]["age"] = age
-                self.registr_table[user.id]["stage"] += 1
-                await self.registration(user)
-                return
-            except ValueError:
-                self.registr_table[user.id]["num_att-2"] = self.registr_table[user.id].get(
-                    "num_att-2",
-                    0) + 1
-                if self.registr_table[user.id]["num_att-2"] == 3:
-                    role_officer = user.guild.get_role(
-                        self.bot.config["roles"]["officerRole"]["roleId"])
-                    role_officer2 = user.guild.get_role(
-                        self.bot.config["roles"]["careerOfficer"]["roleId"])
-                    await self.registr_table[user.id]["thread"].send(
-                        f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention}"
-                        f"и {role_officer2.mention}.")
-                else:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Неправильный формат ввода.\nПопробуйте ещё раз.")
-                    await self.registration(user)
-                    return
-
-        elif self.registr_table[user.id]["stage"] == 3:
-            await self.registr_table[user.id]["thread"].send(
-                "4. Напишите ваш ник в игре War Thunder:")
-
-            def check3(msg_f):
-                if msg_f.author.id == user.id:
-                    if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 3
-                return False
-
-            params = {"event": "message", "timeout": 24 * 60 * 60, "check": check3}
-            msg_name = await self.try_timeout(user, self.bot.wait_for, params)
-            wt_name = msg_name.content
-            await self.registr_table[user.id]["thread"].send("Проверка займёт не больше минуты")
-            stats = await self.bot.scraper.get_stats(wt_name)
-
-            if stats.get("error", 200) == 404:
+        except ValueError:
+            self.registr_table[user.id]["num_att-2"] = self.registr_table[user.id].get(
+                "num_att-2",
+                0) + 1
+            if self.registr_table[user.id]["num_att-2"] == 3:
+                role_officer = user.guild.get_role(
+                    self.bot.config["roles"]["officerRole"]["roleId"])
+                role_officer2 = user.guild.get_role(
+                    self.bot.config["roles"]["careerOfficer"]["roleId"])
                 await self.registr_table[user.id]["thread"].send(
-                    "Не удалось получить информацию об игроке с таким ником.\n"
-                    "Попробуйте ещё раз.")
-                self.registr_table[user.id]["num_att"] = self.registr_table[user.id].get("num_att",
-                                                                                         0) + 1
-                if self.registr_table[user.id]["num_att"] == 3:
-                    # officer_id = self.bot.config["roles"]["officerRole"]["roleId"]
-                    role_officer = user.guild.get_role(
-                        self.bot.config["roles"]["officerRole"]["roleId"])
-                    role_officer2 = user.guild.get_role(
-                        self.bot.config["roles"]["careerOfficer"]["roleId"])
-
-                    await self.registr_table[user.id]["thread"].send(
-                        f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention} и"
-                        f"{role_officer2.mention}.")
-                else:
-                    await self.registration(user)
-                    return
+                    f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention}"
+                    f"и {role_officer2.mention}.")
             else:
-                print(stats)
-                self.registr_table[user.id]["nickname"] = wt_name
-                await self.registr_table[user.id]["thread"].send("Отлично!")
-                await self.registr_table[user.id]["thread"].send("⠀")
-                output_id = self.bot.config["channels"]["statsOutput"]
-                output_ch = filter(lambda chl: chl.id == output_id,
-                                   user.guild.channels).__next__()
-                text = (f"Пользователь: {user.mention}\n"
-                        f"Имя: {self.registr_table[user.id]['real_name']}\n"
-                        f"Никнейм(WT): {self.registr_table[user.id]['nickname']}\n"
-                        f"Возраст: {self.registr_table[user.id]['age']}\n" + stats["display"])
-                stat_msg = await output_ch.send(text)
-                self.registr_table[user.id]["stat_msg"] = stat_msg
-                db_sess = db_session.create_session()
-                user_db = User(id=user.id,
-                               real_name=self.registr_table[user.id]["real_name"],
-                               nickname=self.registr_table[user.id]["nickname"],
-                               age=self.registr_table[user.id]["age"]
-                               )
-                try:
-                    db_sess.add(user_db)
-                    db_sess.commit()
-                except sqlalchemy.exc.IntegrityError:
-                    self.registr_table[user.id]["thread"].send(
-                        "Похоже, что вы уже зарегистрированы.")
-                    await asyncio.sleep(3)
-                    await self.stop_registration(user)
-                    return
-                try:
-                    await user.edit(nick=f"<{self.registr_table[user.id]['nickname']}>"
-                                         f"({self.registr_table[user.id]['real_name']})")
-                except discord.errors.Forbidden:
-                    await self.registr_table[user.id]["thread"].send(
-                        "По всей видимости вы очень высокопоставленный человек на этом сервере.\n"
-                        "Поэтому просим вас самостоятельно поменять ваш никнейм на сервере на формат:\n"
-                        "`<ник_в_War_Thunder>(Настоящие_имя)`")
-                self.registr_table[user.id]["stage"] += 1
+                await self.registr_table[user.id]["thread"].send(
+                    "Неправильный формат ввода.\nПопробуйте ещё раз.")
                 await self.registration(user)
                 return
-        elif self.registr_table[user.id]["stage"] == 4:
-            msg = await self.registr_table[user.id]["thread"].send(
-                "Регистрация почти закончена.\n"
-                "5. Вы желаете вступить в полк?"
-            )
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
 
-            def check5(reaction_f, user_react):
-                if user_react.id == user.id:
-                    if reaction_f.message.channel.id == self.registr_table[user_react.id][
-                        "thread"].id:
-                        return str(reaction_f.emoji) in ['✅', '❌']
+    async def nickanme_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 3:
+        await self.registr_table[user.id]["thread"].send(
+            f"{stage + 1}. Напишите ваш ник в игре War Thunder:")
 
-            params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check5}
-            reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
-            await msg.channel.send(reaction)
-            await msg.clear_reactions()
-            if reaction.emoji == "❌":
-                officer_id = self.bot.config["roles"]["officerRole"]["roleId"]
-                role_officer = user.guild.get_role(self.bot.config["roles"]["officerRole"]["roleId"])
+        def check3(msg_f):
+            if msg_f.author.id == user.id:
+                if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
+                    return self.registr_table[msg_f.author.id]["stage"] == stage
+            return False
+
+        params = {"event": "message", "timeout": 24 * 60 * 60, "check": check3}
+        msg_name = await self.try_timeout(user, self.bot.wait_for, params)
+        wt_name = msg_name.content
+        await self.registr_table[user.id]["thread"].send("Проверка займёт не больше минуты")
+        stats = await self.bot.scraper.get_stats(wt_name)
+
+        if stats.get("error", 200) != 200:
+            await self.registr_table[user.id]["thread"].send(
+                "Не удалось получить информацию об игроке с таким ником.\n"
+                "Попробуйте ещё раз.")
+            self.registr_table[user.id]["num_att"] = self.registr_table[user.id].get("num_att",
+                                                                                     0) + 1
+            if self.registr_table[user.id]["num_att"] == 3:
+                # officer_id = self.bot.config["roles"]["officerRole"]["roleId"]
+                role_officer = user.guild.get_role(
+                    self.bot.config["roles"]["officerRole"]["roleId"])
                 role_officer2 = user.guild.get_role(
                     self.bot.config["roles"]["careerOfficer"]["roleId"])
 
                 await self.registr_table[user.id]["thread"].send(
-                    f"Поговорите, пожалуйста, с {role_officer.mention} или с {role_officer2.mention} насчёт ваших целей на этом сервере.")
-                # await asyncio.sleep(3 * 24 * 3600)
-                # await self.stop_registration(user)
-                return
+                    f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention} и"
+                    f"{role_officer2.mention}.")
             else:
-                self.registr_table[user.id]["stage"] += 1
                 await self.registration(user)
                 return
-
-        elif self.registr_table[user.id]["stage"] == 5:
-            msg = await self.registr_table[user.id]["thread"].send(
-                "6. Если вы готовы регулярно участвоать в полковых боях, то предлагаем вам вступить в\n"
-                "   полк **WarCA**. Нажмите ✅\n"
-                "   Если не готовы, то нажмите на ❌, мы предложим вступить в 'Учебные полки'"
-            )
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
-
-            def check4(reaction_f, user_react):
-                if user_react.id == user.id:
-                    if reaction_f.message.channel.id == self.registr_table[user_react.id][
-                        "thread"].id:
-                        return str(reaction_f.emoji) in ['✅', '❌']
-
-            params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check4}
-            reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
-            await msg.channel.send(reaction)
-            await msg.clear_reactions()
-            if reaction.emoji == "❌":
-                self.registr_table[user.id]["stage"] += 1
-                await self.registration(user)
-                return
-            else:
-                role_id = self.bot.config["roles"]["eliteRole"]["roleId"]
-                guest_id = self.bot.config["roles"]["guestRole"]["roleId"]
-                role_guest = user.guild.get_role(guest_id)
-                role_rgt = user.guild.get_role(role_id)
-                role_alliance = user.guild.get_role(self.bot.config["roles"]["alliance"]["roleId"])
-                text = self.registr_table[user.id]["stat_msg"].content
-                text += f"\n`Полк: {role_rgt.name}`"
-                await self.registr_table[user.id]["stat_msg"].edit(content=text)
-                try:
-                    await user.remove_roles(role_guest)
-                    await user.add_roles(role_rgt, role_alliance)
-                except discord.errors.Forbidden:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Похоже вы очень важный человек на этом сервере,\n"
-                        "поэтому не получаестся присвоить вам роли:\n"
-                        f"`{role_rgt}`"
-                    )
-                db_sess = db_session.create_session()
-                user_db = db_sess.query(User).filter(User.id == user.id).first()
-                # rgt_id = db_sess.query(Regiment.id).filter(Regiment.label == "WarCA").first()[0]
-                user_db.rgt_id = role_id
-                db_sess.commit()
-                await self.registr_table[user.id]["thread"].send("Добро пожаловать в **WarCA**!")
-                await asyncio.sleep(4)
-                await self.stop_registration(user)
-                return
-
-        elif self.registr_table[user.id]["stage"] == 6:
-            regiments = self.bot.config["registration"]["regiments"]
-            rgt_text = "\n".join(
-                [str(i + 1) + ". " + rgt["name"] for i, rgt in enumerate(regiments)])
-            await self.registr_table[user.id]["thread"].send(
-                "Предлагаем вам вступить в другие полки\n"
-                "(для выбора ответа напишите его номер.\n"
-                "Номер указан слева от варианта ответа):\n"
-                f"{rgt_text}"
-            )
-
-            def check5(msg_f):
-                if msg_f.author.id == user.id:
-                    if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
-                        return self.registr_table[msg_f.author.id]["stage"] == 6
-                return False
-
-            params = {"event": "message", "timeout": 24 * 60 * 60, "check": check5}
-            msg_rgt = await self.try_timeout(user, self.bot.wait_for, params)
+        else:
+            print(stats)
+            self.registr_table[user.id]["nickname"] = wt_name
+            await self.registr_table[user.id]["thread"].send("Отлично!")
+            await self.registr_table[user.id]["thread"].send("⠀")
+            output_id = self.bot.config["channels"]["statsOutput"]
+            output_ch = filter(lambda chl: chl.id == output_id,
+                               user.guild.channels).__next__()
+            text = (f"Пользователь: {user.mention}\n"
+                    f"Имя: {self.registr_table[user.id]['real_name']}\n"
+                    f"Никнейм(WT): {self.registr_table[user.id]['nickname']}\n"
+                    f"Возраст: {self.registr_table[user.id]['age']}\n" + stats["display"])
+            stat_msg = await output_ch.send(text)
+            self.registr_table[user.id]["stat_msg"] = stat_msg
+            db_sess = db_session.create_session()
+            user_db = User(id=user.id,
+                           real_name=self.registr_table[user.id]["real_name"],
+                           nickname=self.registr_table[user.id]["nickname"],
+                           age=self.registr_table[user.id]["age"]
+                           )
             try:
-                ind_rgt = int(msg_rgt.content) - 1
-                if not (ind_rgt in range(len(regiments))):
-                    raise IndexError
-
-                rgt = regiments[ind_rgt]
-                self.registr_table[user.id]["stage"] += 1
-
-                role_guest = user.guild.get_role(self.bot.config["roles"]["guestRole"]["roleId"])
-                role_rgt = user.guild.get_role(rgt["roleId"])
-                role_student = user.guild.get_role(self.bot.config["roles"]["studentRole"]["roleId"])
-                role_alliance = user.guild.get_role(self.bot.config["roles"]["alliance"]["roleId"])
-                text = self.registr_table[user.id]["stat_msg"].content
-                text += f"\n`Полк: {role_rgt.name}`"
-                await self.registr_table[user.id]["stat_msg"].edit(content=text)
-                try:
-                    await user.remove_roles(role_guest)
-                    await user.add_roles(role_rgt, role_student, role_alliance)
-                except discord.errors.Forbidden:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Похоже вы очень важный человек на этом сервере,\n"
-                        "поэтому не получаестся присвоить вам роли:\n"
-                        f"`{role_student.name}` и `{role_rgt.name}`"
-                    )
-                db_sess = db_session.create_session()
-                user_db = db_sess.query(User).filter(User.id == user.id).first()
-                user_db.rgt_id = role_rgt.id
+                db_sess.add(user_db)
                 db_sess.commit()
-                await self.registr_table[user.id]["thread"].send(
-                    "**Добро пожаловать к нам на сервер!**"
-                )
-                await asyncio.sleep(4)
+            except sqlalchemy.exc.IntegrityError:
+                self.registr_table[user.id]["thread"].send(
+                    "Похоже, что вы уже зарегистрированы.")
+                await asyncio.sleep(3)
                 await self.stop_registration(user)
                 return
-            except (ValueError, IndexError):
-                self.registr_table[user.id]["num_att6"] = self.registr_table[user.id].get("num_att6",
-                                                                                          0) + 1
-                if self.registr_table[user.id]["num_att6"] == 3:
-                    role_officer = user.guild.get_role(
-                        self.bot.config["roles"]["officerRole"]["roleId"])
-                    role_officer2 = user.guild.get_role(
-                        self.bot.config["roles"]["careerOfficer"]["roleId"])
-                    await self.registr_table[user.id]["thread"].send(
-                        f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention} или "
-                        f"{role_officer2.mention}.")
-                else:
-                    await self.registr_table[user.id]["thread"].send(
-                        "Чел, как здесь можно неправильно написать?\n"
-                        "Попробуй ещё раз, но уже без таких приколов")
-                    await self.registration(user)
-                    return
+            try:
+                await user.edit(nick=f"<{self.registr_table[user.id]['nickname']}>"
+                                     f"({self.registr_table[user.id]['real_name']})")
+            except discord.errors.Forbidden:
+                await self.registr_table[user.id]["thread"].send(
+                    "По всей видимости вы очень высокопоставленный человек на этом сервере.\n"
+                    "Поэтому просим вас самостоятельно поменять ваш никнейм на сервере на формат:\n"
+                    "`<ник_в_War_Thunder>(Настоящие_имя)`")
+            self.registr_table[user.id]["stage"] += 1
+            await self.registration(user)
+            return
 
+    async def ready_regiment_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 4:
+        msg = await self.registr_table[user.id]["thread"].send(
+            "Регистрация почти закончена.\n"
+            f"{stage + 1}. Вы желаете вступить в полк?"
+        )
+        await msg.add_reaction("✅")
+        await msg.add_reaction("❌")
+
+        def check5(reaction_f, user_react):
+            if user_react.id == user.id:
+                if reaction_f.message.channel.id == self.registr_table[user_react.id][
+                    "thread"].id:
+                    return str(reaction_f.emoji) in ['✅', '❌']
+
+        params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check5}
+        reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
+        await msg.channel.send(reaction)
+        await msg.clear_reactions()
+        if reaction.emoji == "❌":
+            officer_id = self.bot.config["roles"]["officerRole"]["roleId"]
+            role_officer = user.guild.get_role(self.bot.config["roles"]["officerRole"]["roleId"])
+            role_officer2 = user.guild.get_role(
+                self.bot.config["roles"]["careerOfficer"]["roleId"])
+
+            await self.registr_table[user.id]["thread"].send(
+                f"Поговорите, пожалуйста, с {role_officer.mention} или с {role_officer2.mention} насчёт ваших целей на этом сервере.")
+            # await asyncio.sleep(3 * 24 * 3600)
+            # await self.stop_registration(user)
+            return
+        else:
+            self.registr_table[user.id]["stage"] += 1
+            await self.registration(user)
+            return
+
+    async def elite_regiment_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 5:
+        msg = await self.registr_table[user.id]["thread"].send(
+            f"{stage + 1}. Если вы готовы регулярно участвоать в полковых боях, то предлагаем вам вступить в\n"
+            "   полк **WarCA** или в **WarCI** (После выбора одного из этих вариантов\n"
+            "   вы будете приглашены на собеседование).\n"
+            "   Нажмите на :clown: для вступления в **WarCA**.\n"
+            "   Нажмите на :alien:  для вступления в **WarCI**.\n"
+            "   Нажмите на ❌, если вы не готовы к такой ответственности, мы предложим вступить в 'Учебные полки'."
+        )
+        await msg.add_reaction('🤡')
+        await msg.add_reaction('👽')
+        await msg.add_reaction("❌")
+
+        def check4(reaction_f, user_react):
+            if user_react.id == user.id:
+                if reaction_f.message.channel.id == self.registr_table[user_react.id]["thread"].id:
+                    return str(reaction_f.emoji) in ['❌', '🤡', '👽']
+
+        async def end_registration_elite_roles(role_rgt_, role_pings):
+            guest_id = self.bot.config["roles"]["guestRole"]["roleId"]
+            role_guest = user.guild.get_role(guest_id)
+            role_alliance = user.guild.get_role(self.bot.config["roles"]["alliance"]["roleId"])
+            text = self.registr_table[user.id]["stat_msg"].content
+            text += f"\n`Полк: {role_rgt_.name}`"
+            await self.registr_table[user.id]["stat_msg"].edit(content=text)
+            try:
+                await user.remove_roles(role_guest)
+                await user.add_roles(role_rgt_, role_alliance)
+            except discord.errors.Forbidden:
+                await self.registr_table[user.id]["thread"].send(
+                    "Похоже вы очень важный человек на этом сервере,\n"
+                    "поэтому не получаестся присвоить вам роли:\n"
+                    f"`{role_rgt_}`"
+                )
+            db_sess = db_session.create_session()
+            user_db = db_sess.query(User).filter(User.id == user.id).first()
+            # rgt_id = db_sess.query(Regiment.id).filter(Regiment.label == "WarCA").first()[0]
+            # user_db.rgt_id = role_id
+            db_sess.commit()
+            # await self.registr_table[user.id]["thread"].send("Добро пожаловать в **WarCA**!")
+            # await asyncio.sleep(4)
+            # await self.stop_registration(user)
+            role_officer = user.guild.get_role(self.bot.config["roles"]["officerRole"]["roleId"])
+            role_officer2 = user.guild.get_role(
+                self.bot.config["roles"]["careerOfficer"]["roleId"])
+            mentions = " ".join([user.guild.get_role(i).mention for i in role_pings])
+            await self.registr_table[user.id]["thread"].send(
+                f"Отлично, ждите ответа от {mentions}.\nОни проведут ваше собеседование в этот полк.")
+            return
+
+        params = {"event": "reaction_add", "timeout": 1 * 60 * 60, "check": check4}
+        reaction, user_ = await self.try_timeout(user, self.bot.wait_for, params)
+        await msg.channel.send(reaction)
+        await msg.clear_reactions()
+
+        if reaction.emoji == "❌":
+            self.registr_table[user.id]["stage"] += 1
+            await self.registration(user)
+            return
+        elif reaction.emoji == "🤡":
+            role_id = self.bot.config["roles"]["candidateEliteRole"]["roleId"]
+            role_pings_id = [self.bot.config["roles"]["commanderElite1Role"]["roleId"],
+                             self.bot.config["roles"]["officerElite1Role"]["roleId"],
+                             self.bot.config["roles"]["allianceOfficerRole"]["roleId"]]
+            role_rgt = user.guild.get_role(role_id)
+            await end_registration_elite_roles(role_rgt, role_pings_id)
+
+        elif reaction.emoji == "👽":
+            role_id = self.bot.config["roles"]["candidateElite2Role"]["roleId"]
+            role_pings_id = [self.bot.config["roles"]["commanderElite2Role"]["roleId"],
+                             self.bot.config["roles"]["officerElite2Role"]["roleId"],
+                             self.bot.config["roles"]["allianceOfficerRole"]["roleId"]]
+
+            role_rgt = user.guild.get_role(role_id)
+            await end_registration_elite_roles(role_rgt, role_pings_id)
+
+    async def study_regiment_question(self, user, stage):
+        # elif self.registr_table[user.id]["stage"] == 6:
+        regiments = self.bot.config["registration"]["regiments"]
+        rgt_text = "\n".join(
+            [str(i + 1) + ". " + rgt["name"] for i, rgt in enumerate(regiments)])
+        await self.registr_table[user.id]["thread"].send(
+            "Предлагаем вам вступить в другие полки\n"
+            "(для выбора ответа напишите его номер.\n"
+            "Номер указан слева от варианта ответа):\n"
+            f"{rgt_text}"
+        )
+
+        def check5(msg_f):
+            if msg_f.author.id == user.id:
+                if msg_f.channel.id == self.registr_table[msg_f.author.id]["thread"].id:
+                    return self.registr_table[msg_f.author.id]["stage"] == stage
+            return False
+
+        params = {"event": "message", "timeout": 24 * 60 * 60, "check": check5}
+        msg_rgt = await self.try_timeout(user, self.bot.wait_for, params)
+        try:
+            ind_rgt = int(msg_rgt.content) - 1
+            if not (ind_rgt in range(len(regiments))):
+                raise IndexError
+
+            rgt = regiments[ind_rgt]
+            self.registr_table[user.id]["stage"] += 1
+
+            role_guest = user.guild.get_role(self.bot.config["roles"]["guestRole"]["roleId"])
+            role_rgt = user.guild.get_role(rgt["roleId"])
+            role_student = user.guild.get_role(self.bot.config["roles"]["studentRole"]["roleId"])
+            role_alliance = user.guild.get_role(self.bot.config["roles"]["alliance"]["roleId"])
+            text = self.registr_table[user.id]["stat_msg"].content
+            text += f"\n`Полк: {role_rgt.name}`"
+            await self.registr_table[user.id]["stat_msg"].edit(content=text)
+            try:
+                await user.remove_roles(role_guest)
+                await user.add_roles(role_rgt, role_student, role_alliance)
+            except discord.errors.Forbidden:
+                await self.registr_table[user.id]["thread"].send(
+                    "Похоже вы очень важный человек на этом сервере,\n"
+                    "поэтому не получаестся присвоить вам роли:\n"
+                    f"`{role_student.name}` и `{role_rgt.name}`"
+                )
+            db_sess = db_session.create_session()
+            user_db = db_sess.query(User).filter(User.id == user.id).first()
+            user_db.rgt_id = role_rgt.id
+            db_sess.commit()
+            await self.registr_table[user.id]["thread"].send(
+                "**Добро пожаловать к нам на сервер!**"
+            )
+            await asyncio.sleep(4)
+            await self.stop_registration(user)
+            return
+        except (ValueError, IndexError):
+            self.registr_table[user.id]["num_att6"] = self.registr_table[user.id].get("num_att6",
+                                                                                      0) + 1
+            if self.registr_table[user.id]["num_att6"] == 3:
+                role_officer = user.guild.get_role(
+                    self.bot.config["roles"]["officerRole"]["roleId"])
+                role_officer2 = user.guild.get_role(
+                    self.bot.config["roles"]["careerOfficer"]["roleId"])
+                await self.registr_table[user.id]["thread"].send(
+                    f"Вы использовали 3 попытки. Просим вас пройти регистрацию через {role_officer.mention} или "
+                    f"{role_officer2.mention}.")
+            else:
+                await self.registr_table[user.id]["thread"].send(
+                    "Чел, как здесь можно неправильно написать?\n"
+                    "Попробуй ещё раз, но уже без таких приколов")
+                await self.registration(user)
+                return
+
+    async def registration(self, user):
+        stage = self.registr_table[user.id]["stage"]
+        seq_quests = {0: self.rule_question,
+                      1: self.name_question,
+                      2: self.age_question,
+                      3: self.nickanme_question,
+                      4: self.ready_regiment_question,
+                      5: self.elite_regiment_question,
+                      6: self.study_regiment_question
+                      }
+        await seq_quests[stage](user, stage)
 # reaction, user_ = await self.bot.wait_for('reaction_add', timeout=24 * 60 * 60, check=self.check0)

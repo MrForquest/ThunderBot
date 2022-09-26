@@ -10,6 +10,12 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import requests
 
 
+# from pyvirtualdisplay import Display
+
+# display = Display(visible=0, size=(60, 40))
+# display.start()
+
+
 class AsyncWebDriverWait(WebDriverWait):
     async def async_until(self, method, message: str = ""):
         screen = None
@@ -78,13 +84,13 @@ class StatScraper:
                 return {"error": 404}
             info = self.parse_element(element)
             winrate = info[3][2]
-            deaths = int(info[4][2]) if info[4][2] != "N/A" else 0
-            air_kills = int(info[7][2]) if info[7][2] != "N/A" else 0
-            earth_kills = int(info[8][2]) if info[8][2] != "N/A" else 0
-            water_kills = int(info[9][2]) if info[9][2] != "N/A" else 0
+            deaths = int(info[4][2].replace(",", "")) if info[4][2] != "N/A" else 0
+            air_kills = int(info[7][2].replace(",", "")) if info[7][2] != "N/A" else 0
+            earth_kills = int(info[8][2].replace(",", "")) if info[8][2] != "N/A" else 0
+            water_kills = int(info[9][2].replace(",", "")) if info[9][2] != "N/A" else 0
             kills = (air_kills + earth_kills + water_kills)
-            kd = str(round(kills / deaths)) if deaths != 0 else "None"
-            res = {"kd": kd, "winrate": winrate, "source": "wro"}
+            kd = str(round(kills / deaths, 2)) if deaths != 0 else "None"
+            res = {"kd": kd, "winrate": winrate, "source": "wro", "error": 200}
             res["display"] = (f"`Игрок: {username}`\n"
                               f"`Винрейт(РБ): {res['winrate']}`\n"
                               f"`КД(РБ): {res['kd']}`")
@@ -108,11 +114,11 @@ class StatScraper:
                                     f"`КД(РБ): {stats['kd']}`")
                 return stats
             except requests.exceptions.Timeout:
-                return 502
+                return {"error": 502}
 
     async def get_stats(self, username):
-        stats = await self.get_user_stats_thunderskill(username)
-        if stats.get("error", 200) in range(500, 505):
-            stats = await self.get_user_stats_official(username)
+        stats = await self.get_user_stats_official(username)
+        if stats.get("error", 200) in range(403, 505):
+            stats = await self.get_user_stats_thunderskill(username)
 
         return stats

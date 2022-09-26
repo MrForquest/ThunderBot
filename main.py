@@ -53,7 +53,8 @@ class Commands(commands.Cog):
         if not user:
             await ctx.send("Пользователь с таким id не зарегистрирован.")
             return
-        await ctx.send(await self.bot.scraper.get_stats(user.nickname)["display"])
+        text = (await self.bot.scraper.get_stats(user.nickname))["display"]
+        await ctx.send(text)
 
     @commands.command(name='deluser')
     @commands.has_any_role(config["roles"]["allianceOfficerRole"]["roleId"],
@@ -68,7 +69,7 @@ class Commands(commands.Cog):
             user = member
             if not (param is None):
                 if param == "-c":
-                    await self.clear_roles(user)
+                    await self.clear_roles(ctx, member)
             await ctx.send(f"Пользователь {user.mention} удалён из БД")
         else:
             await ctx.send(f"Пользователь c таким id не найден.")
@@ -94,14 +95,13 @@ class Commands(commands.Cog):
     @commands.command(name='help')
     async def get_help(self, ctx):
         cmd_pref = self.bot.config['command_prefix']
-        text = (f"> **Список команд**\n> Используйте `{cmd_pref}` в качестве префикса для команд\n"
+        text = (f"> **Список команд**\n> Используйте {cmd_pref} в качестве префикса для команд\n"
                 f"> `{cmd_pref}reg`: Вызов собственной регистрации\n"
                 f"> `{cmd_pref}stats упоминание_пользователя`: Вывод статистики пользователя\n"
                 f"> `{cmd_pref}clearroles упоминание_пользователя`: Очищает все роли и добавляет роль резерв\n"
                 f"> `{cmd_pref}deluser упоминание_пользователя`: Удаление пользователя из БД\n"
                 f"> `{cmd_pref}deluser упоминание_пользователя -c`: То же что deluser и clearroles одновременно.\n"
-                f"> `{cmd_pref}cleardb`: Очищает всю БД. Использовать в САМЫХ КРАЙНИХ СЛУЧАЯХ!"
-                )
+                f"> `{cmd_pref}cleardb`: Очищает всю БД. Использовать в САМЫХ КРАЙНИХ СЛУЧАЯХ!")
         await ctx.reply(text)
 
     @commands.Cog.listener()

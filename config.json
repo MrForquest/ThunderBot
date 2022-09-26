@@ -1,5 +1,5 @@
 {
-  "bot_token": "MTAxMDUwNTM0ODczNTU2OTk0MQ.GlM-EL.blrP4KlD4HILi40ZnNn3bn6gVfaGId0ugYU3KQ",
+  "bot_token": "",
   "command_prefix": "*",
   "guild": 256745640011366402,
   "channels": {
@@ -24,10 +24,6 @@
       "name": "Учебный полк",
       "roleId": 959714754203643904
     },
-    "eliteRole": {
-      "name": "WarCA",
-      "roleId": 777294321854185512
-    },
     "reservRole": {
       "name": "резерв",
       "roleId": 916507569869172767
@@ -47,16 +43,47 @@
     "technoAdmin": {
       "name": "Технический администратор",
       "roleId": 777300462805188619
+    },
+    "commanderRole": {
+      "name": "Командир",
+      "roleId": 1015667829372113048
+    },
+    "eliteRole": {
+      "name": "WarCA",
+      "roleId": 777294321854185512
+    },
+    "elite2Role": {
+      "name": "WarCI",
+      "roleId": 1000514623910461551
+    },
+    "commanderElite1Role": {
+      "name": "Командир WarCA",
+      "roleId": 777297877973991424
+    },
+    "commanderElite2Role": {
+      "name": "Командир WarCI",
+      "roleId": 1015552376377184337
+    },
+    "officerElite1Role": {
+      "name": "Офицер WarCA",
+      "roleId": 1015668044879630389
+    },
+    "officerElite2Role": {
+      "name": "Офицер WarCI",
+      "roleId": 1015552576395153428
+    },
+    "candidateEliteRole": {
+      "name": "Кандидат WarCA",
+      "roleId": 1017558250100637726
+    },
+    "candidateElite2Role": {
+      "name": "Кандидат WarCI",
+      "roleId": 1017558290416291850
     }
   },
   "registration": {
     "channelRegistrationId": 1014967899380777040,
     "regiments": [
-      {
-        "name": "WarCI",
-        "roleId": 1000514623910461551,
-        "channelId": 1
-      },
       {
         "name": "XJIOP",
         "roleId": 959814088584757338,
