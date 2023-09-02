@@ -1,5 +1,6 @@
+py-cord
+undetected-chromedriver
 SQLAlchemy~=1.4.40
-discord~=1.7.3
 requests~=2.28.1
 selenium~=4.4.3
 beautifulsoup4~=4.11.1
