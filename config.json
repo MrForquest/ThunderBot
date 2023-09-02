@@ -79,6 +79,10 @@
     "candidateElite2Role": {
       "name": "Кандидат WarCI",
       "roleId": 1017558290416291850
+    },
+    "officerStudentRole": {
+      "name": "Офицер уч. полков",
+      "roleId": 777294571906007040
     }
   },
   "registration": {
@@ -87,122 +91,146 @@
       {
         "name": "XJIOP",
         "roleId": 959814088584757338,
-        "channelId": 2
+        "channel1Id": 1022935889959194674,
+        "channel2Id": 2
       },
       {
         "name": "KOKA",
         "roleId": 908770702654603275,
-        "channelId": 3
+        "channel1Id": 1022956669648519250,
+        "channel2Id": 2
       },
       {
         "name": "030H",
         "roleId": 835295093413117963,
-        "channelId": 4
+        "channel1Id": 1022956487796072508,
+        "channel2Id": 2
       },
       {
         "name": "DSRTR",
         "roleId": 908770817649819678,
-        "channelId": 5
+        "channel1Id": 1022956624211619880,
+        "channel2Id": 2
       },
       {
         "name": "IIUBO",
         "roleId": 917299607187386379,
-        "channelId": 6
+        "channel1Id": 1022956718264692817,
+        "channel2Id": 2
       },
       {
         "name": "03оH",
         "roleId": 842397142105456650,
-        "channelId": 7
+        "channel1Id": 1022956577805848676,
+        "channel2Id": 2
       },
       {
         "name": "METAH",
         "roleId": 959725281055232041,
-        "channelId": 8
+        "channel1Id": 1022956776091570296,
+        "channel2Id": 2
       },
       {
         "name": "A3OT",
         "roleId": 959812860563820564,
-        "channelId": 9
+        "channel1Id": 1022949385086177290,
+        "channel2Id": 1021805816354967624
       },
       {
         "name": "PolBu",
         "roleId": 959714360853409802,
-        "channelId": 10
+        "channel1Id": 1022955624616689705,
+        "channel2Id": 2
       },
       {
         "name": "PTyTb",
         "roleId": 959813799861420093,
-        "channelId": 11
+        "channel1Id": 1022956223852720190,
+        "channel2Id": 2
       },
       {
         "name": "OKTAH",
         "roleId": 959814233669914645,
-        "channelId": 12
+        "channel1Id": 1022947564162654248,
+        "channel2Id": 2
       },
       {
         "name": "HEOH",
         "roleId": 959813901824954379,
-        "channelId": 13
+        "channel1Id": 1037025922420838521,
+        "channel2Id": 2
       },
       {
         "name": "Hired",
         "roleId": 959813544206020618,
-        "channelId": 14
+        "channel1Id": 1022955575979552888,
+        "channel2Id": 2
       },
       {
         "name": "XPOM",
         "roleId": 959814000902811678,
-        "channelId": 15
-      },
-      {
-        "name": "XJIOP",
-        "roleId": 959814088584757338,
-        "channelId": 16
+        "channel1Id": 1022956378857410650,
+        "channel2Id": 2
       },
       {
         "name": "ZomCa",
         "roleId": 959813657141850124,
-        "channelId": 17
+        "channel1Id": 1022956163018526730,
+        "channel2Id": 2
       },
       {
         "name": "KAPAT",
         "roleId": 959813461964103680,
-        "channelId": 18
+        "channel1Id": 1022956869494505532,
+        "channel2Id": 2
       },
       {
         "name": "Manic",
         "roleId": 959813384386248704,
-        "channelId": 19
+        "channel1Id": 1022955817579847690,
+        "channel2Id": 2
       },
       {
         "name": "OTPOK",
         "roleId": 959813718210904114,
-        "channelId": 20
+        "channel1Id": 1022947716088746044,
+        "channel2Id": 2
       },
       {
         "name": "NAMI",
         "roleId": 959813299065716756,
-        "channelId": 21
+        "channel1Id": 1022956418703302736,
+        "channel2Id": 2
       },
       {
         "name": "RUBY",
         "roleId": 954079334660988931,
-        "channelId": 22
+        "channel1Id": 1022956969377677432,
+        "channel2Id": 2
       },
       {
         "name": "Valve",
         "roleId": 963431563784224808,
-        "channelId": 23
+        "channel1Id": 1037113586373378068,
+        "channel2Id": 2
       },
       {
         "name": "AGFT",
         "roleId": 980877683250569297,
-        "channelId": 24
+        "channel1Id": 1022956067669413918,
+        "channel2Id": 2
       },
       {
         "name": "r384",
         "roleId": 938458899458191440,
-        "channelId": 24
+        "channel1Id": 1022956829921251379,
+        "channel2Id": 2
+      },
+      {
+        "name": "WarCI",
+        "roleId": 1000514623910461551,
+        "channel1Id": 1037024582638522368,
+        "channel2Id": 2
       }
     ]
   }

@@ -1,7 +1,7 @@
 import discord
 import logging
 import requests
-from discord.ext import commands
+from discord.ext import commands, tasks
 # from events import Events
 from registration_form import RegistrationForm
 from user_stats import StatScraper
@@ -40,10 +40,22 @@ config = init_config()
 class Commands(commands.Cog):
     def __init__(self, bot_):
         self.bot = bot_
+        self.update_active_forum.start()
 
     @commands.command(name='ping')
     async def lol(self, ctx, member: discord.Member = None):
         await ctx.send("pong!")
+
+    @commands.command(name='findme')
+    async def find_me(self, ctx, member: discord.Member = None):
+        await ctx.reply(ctx.channel)
+        await ctx.reply(ctx.channel.id)
+
+    @commands.command(name='forum')
+    async def forum_threads(self, ctx):
+        forum = self.bot.get_channel(1022934245016092763)
+        for thread in forum.threads:
+            print(forum.get_thread(thread.id))
 
     @commands.command(name='stats')
     async def get_stats(self, ctx, member: discord.Member):
@@ -53,13 +65,18 @@ class Commands(commands.Cog):
         if not user:
             await ctx.send("Пользователь с таким id не зарегистрирован.")
             return
-        text = (await self.bot.scraper.get_stats(user.nickname))["display"]
+        result = await self.bot.scraper.get_stats(user.nickname)
+        if not (result.get("error", 200) == 200):
+            await ctx.send(f"Ошибка {result['error']}. Вероятно сайты с информаицей не доступны.")
+            return
+        text = result["display"]
         await ctx.send(text)
 
     @commands.command(name='deluser')
     @commands.has_any_role(config["roles"]["allianceOfficerRole"]["roleId"],
                            config["roles"]["careerOfficer"]["roleId"],
-                           config["roles"]["technoAdmin"]["roleId"])
+                           config["roles"]["technoAdmin"]["roleId"],
+                           config["roles"]["officerStudentRole"]["roleId"])
     async def delete_user(self, ctx, member: discord.Member, param=None):
         db_sess = db_session.create_session()
         user = db_sess.query(User).get(member.id)
@@ -111,6 +128,23 @@ class Commands(commands.Cog):
         if not (user is None):
             db_sess.delete(user)
             db_sess.commit()
+
+    @tasks.loop(hours=24 * 5)
+    async def update_active_forum(self):
+        if not self.bot.is_ready():
+            return
+        guild = self.bot.get_guild(self.bot.config["guild"])
+        forum = guild.get_channel(1022934245016092763)
+
+        thread_ids = [rgt["channel1Id"] for rgt in self.bot.config["registration"]["regiments"]]
+        update_msgs = list()
+        for thread_id in thread_ids:
+            thread = forum.get_thread(thread_id)
+            if not (thread is None):
+                msg = await thread.send("Обновление активности!")
+                update_msgs.append(msg)
+        for msg in update_msgs:
+            await msg.delete()
 
     @commands.Cog.listener()
     async def on_ready(self):

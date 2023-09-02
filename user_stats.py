@@ -70,6 +70,7 @@ class StatScraper:
         return new_stats
 
     async def get_user_stats_official(self, username, delay=10):
+        print(username, "OF start")
         # username = "UN1Y_SATAN1ST"
         # https://warthunder.ru/ru/community/claninfo/War%20Clown%20Association для ЛПР
         async with self.stuff_lock_official:
@@ -81,6 +82,7 @@ class StatScraper:
                     EC.presence_of_element_located(
                         (By.CSS_SELECTOR, ".user-stat__list-row--with-head")))
             except TimeoutException:
+                print(username, "OF Error")
                 return {"error": 404}
             info = self.parse_element(element)
             winrate = info[3][2]
@@ -98,27 +100,31 @@ class StatScraper:
 
     async def get_user_stats_thunderskill(self, username, delay=10):
         async with self.stuff_lock_thundeskill:
+            print(username, "TS start")
             base_url = "https://thunderskill.com/ru/stat/"
-            url = "https://thunderskill.com/ru/stat/" + username + "/export/json"
+            url = base_url + username + "/export/json"
             headers = dict()
             headers[
                 'User-Agent'] = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0"
             try:
                 req = requests.get(url, headers=headers, timeout=7)
                 if req.status_code != 200:
+                    print(username, f"TS Error {req.status_code}")
                     return {"error": req.status_code}
                 stats = req.json()['stats']['r']
                 stats["source"] = "ts"
                 stats["display"] = (f"`Игрок: {username}`\n"
                                     f"`КПД(РБ): {stats['kpd']}`\n"
                                     f"`КД(РБ): {stats['kd']}`")
+                print(username, "TS start")
                 return stats
             except requests.exceptions.Timeout:
+                print(username, "TS Error")
                 return {"error": 502}
 
     async def get_stats(self, username):
         stats = await self.get_user_stats_official(username)
-        if stats.get("error", 200) in range(403, 505):
+        if stats.get("error", 200) in range(400, 505):
             stats = await self.get_user_stats_thunderskill(username)
 
         return stats
