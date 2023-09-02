@@ -37,23 +37,24 @@ class AsyncWebDriverWait(WebDriverWait):
 
 class StatScraper:
     def __init__(self):
-        options = Options()
-        options.add_argument('--disable-infobars')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-browser-side-navigation')
-        options.add_argument("--remote-debugging-port=9222")
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--ignore-ssl-errors')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--log-level=3")
-        options.add_argument('--disable-features=VizDisplayCompositor')
-        options.add_argument('--no-sandbox')
-        driver = uc.Chrome(options=options,
-                           driver_executable_path="/usr/lib/chromium-browser/chromedriver")
-        self.driver = driver
-        self.queue = list()
-        self.stuff_lock_official = asyncio.Lock()
-        self.stuff_lock_thundeskill = asyncio.Lock()
+        pass
+        # options = Options()
+        # options.add_argument('--disable-infobars')
+        # options.add_argument('--disable-dev-shm-usage')
+        # options.add_argument('--disable-browser-side-navigation')
+        # options.add_argument("--remote-debugging-port=9222")
+        # options.add_argument('--ignore-certificate-errors')
+        # options.add_argument('--ignore-ssl-errors')
+        # options.add_argument('--disable-gpu')
+        # options.add_argument("--log-level=3")
+        # options.add_argument('--disable-features=VizDisplayCompositor')
+        # options.add_argument('--no-sandbox')
+        # driver = uc.Chrome(options=options,
+        #                    driver_executable_path="/usr/lib/chromium-browser/chromedriver")
+        # self.driver = driver
+        # self.queue = list()
+        # self.stuff_lock_official = asyncio.Lock()
+        # self.stuff_lock_thundeskill = asyncio.Lock()
 
     def parse_element(self, element):
         table = BeautifulSoup(element.get_attribute('innerHTML'), "html.parser")
@@ -123,6 +124,7 @@ class StatScraper:
                 return {"error": 502}
 
     async def get_stats(self, username):
+        return {"error":404}
         stats = await self.get_user_stats_official(username)
         if stats.get("error", 200) in range(400, 505):
             stats = await self.get_user_stats_thunderskill(username)
